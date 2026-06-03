@@ -5,19 +5,11 @@ const router = Router();
 
 
 
-router.post('/', (req, res) => {
+router.post('/submit', (req, res) => {
   const { fullName = '', age = '', date = '', truthValue = '' } = req.body ?? {};
-
-
+console.log('Received form data:');
+  console.log({ fullName, age, date, truthValue });
   res.status(200).json({
-    message: 'Form fields processed successfully',
-    received: {
-      fullName,
-      age,
-      date,
-      truthValue,
-    },
-    normalized,
   });
 });
 

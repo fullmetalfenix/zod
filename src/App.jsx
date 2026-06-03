@@ -7,9 +7,15 @@ const initialForm = {
   truthValue: '',
 };
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+const normalizedApiBaseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
+const submitEndpoint = `${normalizedApiBaseUrl}/api/form/submit`;
+
 export default function App() {
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(null);
+  const [submitState, setSubmitState] = useState('idle');
+  const [submitError, setSubmitError] = useState('');
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -20,10 +26,34 @@ export default function App() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    setSubmitted({ ...form });
+    setSubmitState('submitting');
+    setSubmitError('');
+
+    try {
+      const response = await fetch(submitEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.message || `Request failed with status ${response.status}`);
+      }
+
+      setSubmitted(payload);
+      setSubmitState('success');
+    } catch (error) {
+      setSubmitted(null);
+      setSubmitState('error');
+      setSubmitError(error instanceof Error ? error.message : 'Unable to submit the form.');
+    }
   }
 
   return (
@@ -83,7 +113,9 @@ export default function App() {
             />
           </label>
 
-          <button type="submit">Submit form</button>
+          <button type="submit" disabled={submitState === 'submitting'}>
+            {submitState === 'submitting' ? 'Submitting...' : 'Submit form'}
+          </button>
         </form>
       </section>
 
@@ -91,6 +123,8 @@ export default function App() {
         <h2>Normalized output</h2>
         {submitted ? (
           <pre>{JSON.stringify(submitted, null, 2)}</pre>
+        ) : submitState === 'error' ? (
+          <p className="empty-state">{submitError}</p>
         ) : (
           <p className="empty-state">Submit the form to see the normalized data.</p>
         )}

@@ -6,6 +6,7 @@
   "scripts": {
     "prestart": "vite build",
     "dev": "vite",
+    "preserver": "vite build",
     "server": "node server/index.js",
     "start": "node server/index.js",
     "build": "vite build",
@@ -15,7 +16,8 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
